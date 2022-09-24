@@ -12,7 +12,8 @@
     <Copyright>Cosmos Software LLC</Copyright>
     <PackageProjectUrl>https://www.moonrise.net</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageIcon>nuget-icon.png</PackageIcon>
+    <PackageIcon></PackageIcon>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
