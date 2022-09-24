@@ -1,6 +1,7 @@
 ﻿using Cosmos.BlobService.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 
 namespace Cosmos.BlobService
@@ -35,32 +36,50 @@ namespace Cosmos.BlobService
             cosmosConfig.PrimaryCloud = "azure";
             cosmosConfig.StorageConfig = new StorageConfig();
 
-
-            cosmosConfig.StorageConfig.AzureConfigs.Add(new AzureStorageConfig()
+            if (string.IsNullOrEmpty(azureBlobStorageConnectionString) == false &&
+                string.IsNullOrEmpty(azureBlobStorageContainerName) == false &&
+                string.IsNullOrEmpty(azureBlobStorageEndPoint) == false)
             {
-                AzureBlobStorageConnectionString = azureBlobStorageConnectionString,
-                AzureBlobStorageContainerName = azureBlobStorageContainerName,
-                AzureBlobStorageEndPoint = azureBlobStorageEndPoint
-            });
+                cosmosConfig.StorageConfig.AzureConfigs.Add(new AzureStorageConfig()
+                {
+                    AzureBlobStorageConnectionString = azureBlobStorageConnectionString,
+                    AzureBlobStorageContainerName = azureBlobStorageContainerName,
+                    AzureBlobStorageEndPoint = azureBlobStorageEndPoint
+                });
+            }
 
-            cosmosConfig.StorageConfig.AmazonConfigs.Add(new AmazonStorageConfig()
+            if (string.IsNullOrEmpty(amazonAwsAccessKeyId) == false &&
+                string.IsNullOrEmpty(amazonAwsSecretAccessKey) == false &&
+                string.IsNullOrEmpty(amazonBucketName) == false &&
+                string.IsNullOrEmpty(amazonRegion) == false &&
+                string.IsNullOrEmpty(profileName) == false &&
+                string.IsNullOrEmpty(serviceUrl) == false)
             {
-                AmazonAwsAccessKeyId = amazonAwsAccessKeyId,
-                AmazonAwsSecretAccessKey = amazonAwsSecretAccessKey,
-                AmazonBucketName = amazonBucketName,
-                AmazonRegion = amazonRegion,
-                ProfileName = profileName,
-                ServiceUrl = serviceUrl
-            });
+                cosmosConfig.StorageConfig.AmazonConfigs.Add(new AmazonStorageConfig()
+                {
+                    AmazonAwsAccessKeyId = amazonAwsAccessKeyId,
+                    AmazonAwsSecretAccessKey = amazonAwsSecretAccessKey,
+                    AmazonBucketName = amazonBucketName,
+                    AmazonRegion = amazonRegion,
+                    ProfileName = profileName,
+                    ServiceUrl = serviceUrl
+                });
+            }
 
-            services.AddSingleton(cosmosConfig);
+            if (cosmosConfig.StorageConfig.AmazonConfigs.Count == 0 && cosmosConfig.StorageConfig.AzureConfigs.Count == 0)
+            {
+                throw new ArgumentException("AWS or Azure storage connection not found.");
+            }
+
+            services.AddSingleton(Options.Create(cosmosConfig));
             services.AddTransient<StorageContext>();
 
         }
 
         private static string GetKeyValue(IConfiguration config, string key)
         {
-            var data = config[key];
+            var data = (config is IConfigurationRoot) ? ((IConfigurationRoot)config)[key] : config[key];
+
             if (string.IsNullOrEmpty(data))
             {
                 data = Environment.GetEnvironmentVariable(key);
