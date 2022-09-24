@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyVersion>6.3.14.2</AssemblyVersion>
+    <FileVersion>6.3.14.2</FileVersion>
+    <Version>6.3.14</Version>
+    <Title>Azure Blob and Amazon S3 Storage Provider</Title>
+    <Authors>toiyabe62</Authors>
+    <Company>Cosmos Software LLC</Company>
+    <Description>Manages BLOB objects in Azure and AWS.</Description>
+    <Copyright>Cosmos Software LLC</Copyright>
+    <PackageProjectUrl>https://www.moonrise.net</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>nuget-icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="nuget.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.9.58" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="_res\icons\nuget-icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
