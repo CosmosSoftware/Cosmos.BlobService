@@ -6,6 +6,9 @@
 
     <IsPackable>false</IsPackable>
 
+    <AssemblyVersion>7.0.1.10</AssemblyVersion>
+    <FileVersion>7.0.1.10</FileVersion>
+    
     <UserSecretsId>7ed6ad29-b9de-4136-a59a-da3c31091141</UserSecretsId>
   </PropertyGroup>
 
@@ -14,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
