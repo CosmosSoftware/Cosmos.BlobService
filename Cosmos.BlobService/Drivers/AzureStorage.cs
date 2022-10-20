@@ -181,7 +181,10 @@ namespace Cosmos.BlobService.Drivers
             var pageable = containerClient.GetBlobsAsync(prefix: path).AsPages();
 
             var results = new List<BlobItem>();
-            await foreach (var page in pageable) results.AddRange(page.Values);
+            await foreach (var page in pageable)
+            {
+                results.AddRange(page.Values);
+            }
 
             return results.Select(s => s.Name).ToList();
         }

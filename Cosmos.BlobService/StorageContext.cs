@@ -268,8 +268,9 @@ namespace Cosmos.BlobService
                 // Copy the blob here
                 //
                 foreach (var cosmosStorage in drivers)
-                    tasks.Add(cosmosStorage.CopyBlobAsync(srcBlobName, destBlobName));
-                Task.WaitAll(tasks.ToArray());
+                {
+                    await cosmosStorage.CopyBlobAsync(srcBlobName, destBlobName);
+                }
 
                 //
                 // Now check to see if files were copied
