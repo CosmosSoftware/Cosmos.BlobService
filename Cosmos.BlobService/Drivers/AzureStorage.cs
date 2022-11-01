@@ -22,9 +22,10 @@ namespace Cosmos.BlobService.Drivers
         ///     Constructor
         /// </summary>
         /// <param name="config"></param>
-        public AzureStorage(AzureStorageConfig config)
+        /// <param name="containerName"></param>
+        public AzureStorage(AzureStorageConfig config, string containerName = "$web")
         {
-            _azureStorageConfig = config;
+            _containerName = containerName;
             _blobServiceClient = new BlobServiceClient(config.AzureBlobStorageConnectionString);
         }
 
@@ -116,7 +117,7 @@ namespace Cosmos.BlobService.Drivers
             destination = destination.TrimStart('/');
 
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
             var sourceBlob = containerClient.GetBlobClient(source);
             if (await sourceBlob.ExistsAsync())
             {
@@ -176,7 +177,7 @@ namespace Cosmos.BlobService.Drivers
         public async Task<List<string>> GetBlobNamesByPath(string path, string[] filter = null)
         {
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
             var pageable = containerClient.GetBlobsAsync(prefix: path).AsPages();
 
@@ -198,7 +199,7 @@ namespace Cosmos.BlobService.Drivers
         {
             var blobs = await GetBlobItemsByPath(target);
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
             var responses = new List<Response<bool>>();
 
@@ -215,7 +216,7 @@ namespace Cosmos.BlobService.Drivers
         public async Task DeleteIfExistsAsync(string target)
         {
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
             await containerClient.DeleteBlobIfExistsAsync(target, DeleteSnapshotsOption.IncludeSnapshots);
         }
 
@@ -230,7 +231,7 @@ namespace Cosmos.BlobService.Drivers
 
             target = target.TrimStart('/');
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
             if (await containerClient.ExistsAsync()) return containerClient.GetBlobClient(target);
 
@@ -246,7 +247,7 @@ namespace Cosmos.BlobService.Drivers
         {
             var results = new List<BlobItem>();
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
             var items = containerClient.GetBlobsAsync(prefix: target);
 
             await foreach (var item in items) results.Add(item);
@@ -291,7 +292,7 @@ namespace Cosmos.BlobService.Drivers
             if (!string.IsNullOrEmpty(path)) path = path.TrimStart('/');
 
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
 
             var resultSegment = containerClient.GetBlobsByHierarchyAsync(prefix: path, delimiter: "/")
@@ -315,7 +316,7 @@ namespace Cosmos.BlobService.Drivers
         public async Task<Stream> GetStreamAsync(string target)
         {
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
             var blobClient = containerClient.GetAppendBlobClient(target);
 
@@ -363,7 +364,7 @@ namespace Cosmos.BlobService.Drivers
 
         #region PRIVATE FIELDS AND METHODS
 
-        private readonly AzureStorageConfig _azureStorageConfig;
+        private readonly string _containerName;
         private readonly BlobServiceClient _blobServiceClient;
 
         /// <summary>
@@ -374,7 +375,7 @@ namespace Cosmos.BlobService.Drivers
         private AppendBlobClient GetAppendBlobClient(string target)
         {
             var containerClient =
-                _blobServiceClient.GetBlobContainerClient(_azureStorageConfig.AzureBlobStorageContainerName);
+                _blobServiceClient.GetBlobContainerClient(_containerName);
 
             return containerClient.GetAppendBlobClient(target);
         }

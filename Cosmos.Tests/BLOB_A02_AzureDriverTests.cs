@@ -35,7 +35,7 @@ namespace Cosmos.Tests
         [TestMethod]
         public async Task A01_GetList()
         {
-            var driver = new AzureStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
+            var driver = new AzureStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault(), "$web");
 
             var blobs = await driver.GetObjectsAsync("");
 
@@ -45,7 +45,7 @@ namespace Cosmos.Tests
         [TestMethod]
         public async Task A02_DeleteItems()
         {
-            var driver = new AzureStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
+            var driver = new AzureStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault(), "$web");
 
             // Delete all blobs
             var blobs = await driver.DeleteFolderAsync("");

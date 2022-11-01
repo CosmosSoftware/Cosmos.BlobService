@@ -23,6 +23,7 @@ namespace Cosmos.BlobService
         /// <param name="cache"></param>
         public StorageContext(IOptions<CosmosStorageConfig> cosmosConfig, IMemoryCache cache)
         {
+            ContainerName = cosmosConfig.Value.StorageConfig.AzureConfigs.FirstOrDefault().AzureBlobStorageContainerName;
             _config = cosmosConfig;
             _memoryCache = cache;
         }
@@ -57,6 +58,15 @@ namespace Cosmos.BlobService
         {
             var driver = GetPrimaryDriver();
             return await driver.BlobExistsAsync(path);
+        }
+
+        /// <summary>
+        /// Changes the default container name
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetContainerName(string name)
+        {
+            ContainerName = name;
         }
 
         /// <summary>
@@ -233,6 +243,11 @@ namespace Cosmos.BlobService
         private readonly IOptions<CosmosStorageConfig> _config;
         private readonly IMemoryCache _memoryCache;
 
+        /// <summary>
+        /// Azure container being connected to.
+        /// </summary>
+        private string ContainerName { get; set; }
+
         private async Task CopyObjectsAsync(string target, string destination, bool deleteSource)
         {
             // Make sure leading slashes are removed.
@@ -320,14 +335,14 @@ namespace Cosmos.BlobService
 
                     if (_config.Value.StorageConfig.AzureConfigs.Any())
                         foreach (var storageConfigAzureConfig in _config.Value.StorageConfig.AzureConfigs)
-                            drivers.Add(new AzureStorage(storageConfigAzureConfig));
+                            drivers.Add(new AzureStorage(storageConfigAzureConfig, ContainerName));
 
                     break;
                 }
                 case "azure":
                 {
                     foreach (var storageConfigAzureConfig in _config.Value.StorageConfig.AzureConfigs)
-                        drivers.Add(new AzureStorage(storageConfigAzureConfig));
+                        drivers.Add(new AzureStorage(storageConfigAzureConfig, ContainerName));
 
                     if (_config.Value.StorageConfig.AmazonConfigs.Any())
                         foreach (var storageConfigAmazonConfig in _config.Value.StorageConfig.AmazonConfigs)
@@ -350,7 +365,7 @@ namespace Cosmos.BlobService
                     return new AmazonStorage(_config.Value.StorageConfig.AmazonConfigs.FirstOrDefault(),
                         _memoryCache);
                 case "azure":
-                    return new AzureStorage(_config.Value.StorageConfig.AzureConfigs.FirstOrDefault());
+                    return new AzureStorage(_config.Value.StorageConfig.AzureConfigs.FirstOrDefault(), ContainerName);
                 default:
                     throw new Exception($"Primary provider '{_config.Value.PrimaryCloud}' is not supported.");
             }
