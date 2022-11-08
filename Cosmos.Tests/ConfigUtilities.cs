@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using System;
+using System.IO;
 using System.Reflection;
 
 namespace Cosmos.Tests
@@ -64,7 +65,8 @@ namespace Cosmos.Tests
             {
                 AzureBlobStorageConnectionString = GetKeyValue(configRoot, "AzureBlobStorageConnectionString"),
                 AzureBlobStorageContainerName = GetKeyValue(configRoot, "AzureBlobStorageContainerName"),
-                AzureBlobStorageEndPoint = GetKeyValue(configRoot, "AzureBlobStorageEndPoint")
+                AzureBlobStorageEndPoint = GetKeyValue(configRoot, "AzureBlobStorageEndPoint"),
+                AzureFileShare = GetKeyValue(configRoot, "AzureFileShare")
             });
 
             return Options.Create(config);

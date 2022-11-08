@@ -24,5 +24,8 @@ namespace Cosmos.BlobService.Config
         /// </summary>
         [Display(Name = "Website URL")]
         public string AzureBlobStorageEndPoint { get; set; }
+
+        [Display(Name = "File share")]
+        public string AzureFileShare { get; set; }
     }
 }
