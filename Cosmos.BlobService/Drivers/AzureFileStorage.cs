@@ -30,6 +30,7 @@ namespace Cosmos.BlobService.Drivers
             _ = _shareClient.CreateIfNotExistsAsync().Result;
         }
 
+        /// <inheritdoc/>
         public async Task AppendBlobAsync(byte[] data, FileUploadMetaData fileMetaData, DateTimeOffset uploadDateTime)
         {
             // Name of the directory and file we'll create
@@ -53,6 +54,7 @@ namespace Cosmos.BlobService.Drivers
 
         }
 
+        /// <inheritdoc/>
         public async Task<bool> BlobExistsAsync(string path)
         {
             // Name of the directory and file we'll create
@@ -85,6 +87,7 @@ namespace Cosmos.BlobService.Drivers
             await file.RenameAsync(newFileName);
         }
 
+        /// <inheritdoc/>
         public async Task CopyBlobAsync(string source, string destination)
         {
             // Name of the directory and file we'll create
@@ -121,6 +124,7 @@ namespace Cosmos.BlobService.Drivers
 
         }
 
+        /// <inheritdoc/>
         public async Task CreateFolderAsync(string target)
         {
             // Name of the directory and file we'll create
@@ -145,6 +149,7 @@ namespace Cosmos.BlobService.Drivers
             }
         }
 
+        /// <inheritdoc/>
         public async Task<int> DeleteFolderAsync(string target)
         {
             var rootDir = _shareClient.GetRootDirectoryClient();
@@ -173,6 +178,7 @@ namespace Cosmos.BlobService.Drivers
             await dirClient.DeleteAsync();
         }
 
+        /// <inheritdoc/>
         public async Task DeleteIfExistsAsync(string target)
         {
             // Name of the directory and file we'll create
@@ -188,6 +194,7 @@ namespace Cosmos.BlobService.Drivers
             await file.DeleteIfExistsAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<List<string>> GetBlobNamesByPath(string path, string[] filter = null)
         {
             var list = new List<string>();
@@ -196,18 +203,53 @@ namespace Cosmos.BlobService.Drivers
             var dirName = Path.GetDirectoryName(path);
             // Get a reference to a directory and create it
             var directory = _shareClient.GetDirectoryClient(dirName);
-
             var contents = directory.GetFilesAndDirectoriesAsync();
 
             int i = 0;
             await foreach (var item in contents)
             {
-                list.Add(item.Name);
+                if (item.IsDirectory)
+                {
+                    var subDirectory = directory.GetSubdirectoryClient(item.Name);
+                    var results = await GetAllBlobsAsync(subDirectory);
+                    list.AddRange(results);
+                }
+                else
+                {
+                    list.Add($"{path}/{item.Name}");
+                }
             }
 
             return list;
         }
 
+        /// <summary>
+        /// Gets all the files in a folder (recursive)
+        /// </summary>
+        /// <param name="dirClient"></param>
+        /// <returns></returns>
+        private async Task<List<string>> GetAllBlobsAsync(ShareDirectoryClient dirClient)
+        {
+            var list = new List<string>();
+
+            await foreach (ShareFileItem item in dirClient.GetFilesAndDirectoriesAsync())
+            {
+                if (item.IsDirectory)
+                {
+                    var subDir = dirClient.GetSubdirectoryClient(item.Name);
+                    list.AddRange(await GetAllBlobsAsync(subDir));
+                }
+                else
+                {
+                    var path = dirClient.Path.Replace("\\", "/");
+                    list.Add($"{path}/{item.Name}");
+                }
+            }
+
+            return list;
+        }
+
+        /// <inheritdoc/>
         public async Task<FileMetadata> GetFileMetadataAsync(string target)
         {
 
@@ -233,13 +275,17 @@ namespace Cosmos.BlobService.Drivers
                 UploadDateTime = props.Value.LastModified.UtcDateTime.Ticks
             };
         }
+
+
+        /// <inheritdoc/>
         public Task<List<FileMetadata>> GetInventory()
         {
             throw new NotImplementedException();
         }
 
+
         /// <summary>
-        ///     Gets a client for a blob.
+        /// Gets a blob object
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
@@ -318,6 +364,20 @@ namespace Cosmos.BlobService.Drivers
                     if (item.IsDirectory)
                     {
                         var subClient = directory.GetSubdirectoryClient(item.Name);
+
+                        var subList = subClient.GetFilesAndDirectoriesAsync();
+
+                        var hasSubdirectories = false;
+
+                        await foreach(var i in subList)
+                        {
+                            if (i.IsDirectory)
+                            {
+                                hasSubdirectories = true;
+                                break;
+                            }
+                        }
+
                         var props = await subClient.GetPropertiesAsync();
 
                         var fileManagerEntry = new FileManagerEntry
@@ -325,12 +385,12 @@ namespace Cosmos.BlobService.Drivers
                             Created = props.Value.LastModified.DateTime,
                             CreatedUtc = props.Value.LastModified.UtcDateTime,
                             Extension = "",
-                            HasDirectories = false,
-                            IsDirectory = false,
+                            HasDirectories = hasSubdirectories,
+                            IsDirectory = true,
                             Modified = props.Value.LastModified.DateTime,
                             ModifiedUtc = props.Value.LastModified.UtcDateTime,
                             Name = item.Name,
-                            Path = path,
+                            Path = $"{path}/{item.Name}",
                             Size = 0
                         };
                         items.Add(fileManagerEntry);
@@ -361,7 +421,7 @@ namespace Cosmos.BlobService.Drivers
                             Modified = info.Value.LastModified.DateTime,
                             ModifiedUtc = info.Value.LastModified.UtcDateTime,
                             Name = item.Name,
-                            Path = path,
+                            Path = $"{path}/{item.Name}",
                             Size = info.Value.ContentLength
                         };
                         items.Add(fileManagerEntry);
@@ -373,6 +433,7 @@ namespace Cosmos.BlobService.Drivers
             return items;
         }
 
+        /// <inheritdoc/>
         public async Task<Stream> GetStreamAsync(string target)
         {
             if (target == "/") target = "";
@@ -397,6 +458,7 @@ namespace Cosmos.BlobService.Drivers
             throw new Exception($"Directory not found: {dirName}");
         }
 
+        /// <inheritdoc/>
         public async Task<bool> UploadStreamAsync(Stream readStream, FileUploadMetaData fileMetaData, DateTimeOffset uploadDateTime)
         {
             // Get directory name

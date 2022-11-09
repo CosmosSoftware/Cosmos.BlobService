@@ -34,16 +34,12 @@ namespace Cosmos.Tests
             _cosmosConfig = config;
 
             _fullPathTestFile = Path.Combine(context.DeploymentDirectory, BLOB_Driver_TestConstants.TestFile1);
-        }
 
-        [TestMethod]
-        public async Task A01_GetList()
-        {
             var driver = new AzureFileStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
 
-            var blobs = await driver.GetObjectsAsync("");
+            // Cleanup before test.
+            _ = driver.DeleteFolderAsync("/hello-world-1").Result;
 
-            Assert.IsNotNull(blobs);
         }
 
         [TestMethod]
@@ -137,9 +133,30 @@ namespace Cosmos.Tests
             //Assert.AreEqual(prop1.Value.ContentLength, prop2.Value.ContentLength);
         }
 
+        [TestMethod]
+        public async Task A06_GetObjectsAsync()
+        {
+            var driver = new AzureFileStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
+
+            var blobs = await driver.GetObjectsAsync("");
+
+            Assert.AreEqual(2, blobs.Count);
+            Assert.AreEqual(1, blobs.Count(c => c.IsDirectory));
+            Assert.IsTrue(blobs.FirstOrDefault(f => f.IsDirectory).HasDirectories);
+        }
 
         [TestMethod]
-        public async Task A06_DeleteItems()
+        public async Task A07_GetAllBlobsForPath()
+        {
+            var driver = new AzureFileStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
+
+            var list = await driver.GetBlobNamesByPath("");
+
+            Assert.AreEqual(3, list.Count);
+        }
+
+        [TestMethod]
+        public async Task A08_DeleteItems()
         {
             var driver = new AzureFileStorage(_cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault());
 

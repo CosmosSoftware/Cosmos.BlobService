@@ -54,7 +54,7 @@ namespace Cosmos.BlobService.Drivers
         Task<int> DeleteFolderAsync(string target);
 
         /// <summary>
-        ///     Gets a list of blob names for a given path.
+        ///     Gets a list of blob names for a given path (is recursive).
         /// </summary>
         /// <param name="path"></param>
         /// <param name="filter"></param>
