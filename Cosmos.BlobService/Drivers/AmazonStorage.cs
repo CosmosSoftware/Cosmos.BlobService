@@ -19,7 +19,7 @@ namespace Cosmos.BlobService.Drivers
     /// <summary>
     ///     AWS S3 storage driver
     /// </summary>
-    public class AmazonStorage : ICosmosStorage
+    public sealed class AmazonStorage : ICosmosStorage
     {
 
         /// <summary>

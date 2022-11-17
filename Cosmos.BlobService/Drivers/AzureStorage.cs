@@ -16,7 +16,7 @@ namespace Cosmos.BlobService.Drivers
     /// <summary>
     ///     Azure blob storage driver
     /// </summary>
-    public class AzureStorage : ICosmosStorage
+    public sealed class AzureStorage : ICosmosStorage
     {
         /// <summary>
         ///     Constructor
