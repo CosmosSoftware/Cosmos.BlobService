@@ -22,14 +22,13 @@ namespace Cosmos.BlobService.Drivers
         private readonly ShareClient _shareClient;
 
         /// <summary>
-        ///     Constructor
+        /// Constructor
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="shareName">File share name</param>
-        public AzureFileStorage(AzureStorageConfig config)
+        /// <param name="connectionString"></param>
+        /// <param name="fileShare"></param>
+        public AzureFileStorage(string connectionString, string fileShare)
         {
-            var options = new ShareClientOptions();
-            _shareClient = new ShareClient(config.AzureBlobStorageConnectionString, config.AzureFileShare);
+            _shareClient = new ShareClient(connectionString, fileShare);
             _ = _shareClient.CreateIfNotExistsAsync().Result;
         }
 

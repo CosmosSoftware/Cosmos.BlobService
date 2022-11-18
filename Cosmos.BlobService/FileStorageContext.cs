@@ -19,27 +19,11 @@ namespace Cosmos.BlobService
         /// <summary>
         ///     Constructor
         /// </summary>
-        /// <param name="cosmosConfig"></param>
-        /// <param name="cache"></param>
-        public FileStorageContext(IOptions<CosmosStorageConfig> cosmosConfig)
+        /// <param name="connectionString"></param>
+        /// <param name="sharename"></param>
+        public FileStorageContext(string connectionString, string sharename)
         {
-            _config = cosmosConfig;
-            _driver = new AzureFileStorage(
-                _config.Value.StorageConfig.AzureConfigs.FirstOrDefault(f => string.IsNullOrEmpty(f.AzureFileShare) == false)
-                );
-        }
-
-        /// <summary>
-        ///     Determine if this service is configured
-        /// </summary>
-        /// <returns></returns>
-        public bool IsConfigured()
-        {
-            // Are there configuration settings at all?
-            if (_config.Value == null || _config.Value.StorageConfig == null) return false;
-
-            // Finally, make sure at the very least, Azure blob storage is
-            return _config.Value.StorageConfig.AzureConfigs.Count(c => string.IsNullOrEmpty(c.AzureFileShare) == false) > 0;
+            _driver = new AzureFileStorage(connectionString, sharename);
         }
 
         /// <summary>

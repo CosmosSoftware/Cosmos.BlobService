@@ -22,7 +22,8 @@ namespace Cosmos.Tests
 
         public static FileStorageContext GetContext()
         {
-           return new FileStorageContext(Options.Create(_cosmosConfig));
+            var config = _cosmosConfig.StorageConfig.AzureConfigs.FirstOrDefault(f => string.IsNullOrEmpty(f.AzureFileShare) == false);
+            return new FileStorageContext(config.AzureBlobStorageConnectionString, config.AzureFileShare);
         }
 
         [ClassInitialize]
